@@ -129,6 +129,7 @@ if __name__ == '__main__':
                                     driver.close()
                                     switchNew()
                                 else:
+                                    time.sleep(1)
                                     playBtn = driver.find_element(By.CLASS_NAME, "vjs-big-play-button")
                                     playBtn.click()  # 点击播放按钮
                                     driver.execute_script('document.querySelector("video").playbackRate = 2')
