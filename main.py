@@ -121,7 +121,7 @@ if __name__ == '__main__':
                                 needLearn = True
                                 lessonStat = "看课检测未通过"
                             logging.info(f"{lessonName} | {lessonStat}")
-                            if lessonStat == "去学习" or needLearn:
+                            if lessonStat != "已完成" or needLearn:
                                 ac.click(lesson[0])
                                 ac.perform()
                                 time.sleep(3)  # 这里必须要等，不等无法切换到新页面
@@ -133,12 +133,12 @@ if __name__ == '__main__':
                                     driver.close()
                                     switchNew()
                                 else:
-                                    time.sleep(1)
+                                    time.sleep(2)
                                     # 现在会自动播放，不需要手动点击播放按钮
                                     # playBtn = driver.find_element(By.CLASS_NAME, "vjs-big-play-button")
                                     # playBtn.click()  # 点击播放按钮
-                                    driver.execute_script('document.querySelector("video").playbackRate = 2')
                                     driver.execute_script('document.querySelector("video").muted = true')
+                                    driver.execute_script('document.querySelector("video").playbackRate = 2')
                                     video = driver.find_element(By.TAG_NAME, "video")
                                     while True:
                                         # stupidList = driver.find_elements(By.CLASS_NAME, "earnest_check_mask_box")
