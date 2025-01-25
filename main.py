@@ -142,9 +142,7 @@ if __name__ == '__main__':
                                     video = driver.find_element(By.TAG_NAME, "video")
                                     while True:
                                         # stupidList = driver.find_elements(By.CLASS_NAME, "earnest_check_mask_box")
-                                        stupidList = driver.find_elements(
-                                            By.XPATH, "//*[@id=\"vjs_video_3\"]/div[10]/div/div[2]/span[3]"
-                                        )
+                                        stupidList = driver.find_elements(By.XPATH, "//*[contains(text(),'点击通过检查')]")
                                         stupidList2 = driver.find_elements(By.CLASS_NAME, "action-skip")
                                         if stupidList:
                                             ac.click(stupidList[0])
