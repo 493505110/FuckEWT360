@@ -56,6 +56,7 @@ if __name__ == '__main__':
         start = False
         turnLeft = True
         confirmQuit = False
+        needLearn = False
         while True:
             try:
                 if turnLeft:
@@ -116,8 +117,11 @@ if __name__ == '__main__':
                             lessonName = lesson[0].find_element(By.XPATH, "./*").text
                             lessonStat = lesson[1].find_elements(By.XPATH, "./*")[1].text \
                                 if lesson[1].text != "已完成" else "已完成"
+                            if "看课检测未通过" in rawLesson.text:
+                                needLearn = True
+                                lessonStat = "看课检测未通过"
                             logging.info(f"{lessonName} | {lessonStat}")
-                            if lessonStat == "去学习":
+                            if lessonStat == "去学习" or needLearn:
                                 ac.click(lesson[0])
                                 ac.perform()
                                 time.sleep(3)  # 这里必须要等，不等无法切换到新页面
@@ -130,13 +134,17 @@ if __name__ == '__main__':
                                     switchNew()
                                 else:
                                     time.sleep(1)
-                                    playBtn = driver.find_element(By.CLASS_NAME, "vjs-big-play-button")
-                                    playBtn.click()  # 点击播放按钮
+                                    # 现在会自动播放，不需要手动点击播放按钮
+                                    # playBtn = driver.find_element(By.CLASS_NAME, "vjs-big-play-button")
+                                    # playBtn.click()  # 点击播放按钮
                                     driver.execute_script('document.querySelector("video").playbackRate = 2')
                                     driver.execute_script('document.querySelector("video").muted = true')
                                     video = driver.find_element(By.TAG_NAME, "video")
                                     while True:
-                                        stupidList = driver.find_elements(By.CLASS_NAME, "earnest_check_mask_box")
+                                        # stupidList = driver.find_elements(By.CLASS_NAME, "earnest_check_mask_box")
+                                        stupidList = driver.find_elements(
+                                            By.XPATH, "//*[@id=\"vjs_video_3\"]/div[10]/div/div[2]/span[3]"
+                                        )
                                         stupidList2 = driver.find_elements(By.CLASS_NAME, "action-skip")
                                         if stupidList:
                                             ac.click(stupidList[0])
