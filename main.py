@@ -7,7 +7,7 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 
 USER = "账号"
-PASS = "985211"
+PASS = "密码"
 
 
 def switchNew():
@@ -17,9 +17,13 @@ def switchNew():
 
 
 def getAllProgress():
-    return driver.find_element(
+    allProgress = driver.find_element(
         By.CSS_SELECTOR,
-        "#rc-tabs-0-panel-1 > section > section > section > span:nth-child(1) > span").text
+        "#rc-tabs-0-panel-1 > section > section > section > span:nth-child(1) > span")
+    ac.move_to_element(allProgress)
+    ac.perform()
+    time.sleep(1)
+    return allProgress.text
 
 
 if __name__ == '__main__':
@@ -57,6 +61,7 @@ if __name__ == '__main__':
         turnLeft = True
         confirmQuit = False
         needLearn = False
+        cannotFinish = 0
         while True:
             try:
                 if turnLeft:
@@ -73,9 +78,9 @@ if __name__ == '__main__':
                          .find_elements(By.XPATH, "./*"))
                 time.sleep(1)  # 等加载
                 # print(f"Datas L:{len(datas)}")
-                for i in range(0, len(datas)):
+                for i in range(len(datas)):
                     sProgress = getAllProgress().split("/")
-                    if sProgress[0] == sProgress[1]:
+                    if int(sProgress[0]) == (int(sProgress[1]) - cannotFinish):
                         logging.info("已完成所有课程!")
                         logging.info("回车退出")
                         start = False
@@ -122,44 +127,49 @@ if __name__ == '__main__':
                                 lessonStat = "看课检测未通过"
                             logging.info(f"{lessonName} | {lessonStat}")
                             if lessonStat != "已完成" or needLearn:
-                                ac.click(lesson[0])
-                                ac.perform()
-                                time.sleep(3)  # 这里必须要等，不等无法切换到新页面
-                                switchNew()
-                                if (("xinli.ewt360.com" in driver.current_url) or
-                                        ("web.ewt360.com/spiritual-growth" in driver.current_url)):
-                                    time.sleep(5)
-                                    logging.info(f"{lessonName} | 已完成")
-                                    driver.close()
-                                    switchNew()
+                                if "测试卷" in lessonName:
+                                    logging.info(f"{lessonName} | 做不了试卷，跳过")
+                                    cannotFinish += 1
+                                    continue
                                 else:
-                                    time.sleep(2)
-                                    # 现在会自动播放，不需要手动点击播放按钮
-                                    # playBtn = driver.find_element(By.CLASS_NAME, "vjs-big-play-button")
-                                    # playBtn.click()  # 点击播放按钮
-                                    driver.execute_script('document.querySelector("video").muted = true')
-                                    driver.execute_script('document.querySelector("video").playbackRate = 2')
-                                    video = driver.find_element(By.TAG_NAME, "video")
-                                    while True:
-                                        # stupidList = driver.find_elements(By.CLASS_NAME, "earnest_check_mask_box")
-                                        stupidList = driver.find_elements(By.XPATH, "//*[contains(text(),'点击通过检查')]")
-                                        stupidList2 = driver.find_elements(By.CLASS_NAME, "action-skip")
-                                        if stupidList:
-                                            ac.click(stupidList[0])
-                                            ac.perform()
-                                            logging.info("EWT挂机检测")
-                                        if stupidList2:
-                                            ac.click(stupidList2[0])
-                                            ac.perform()
-                                            logging.info("EWT问题检测")
-                                        currentTime = video.get_attribute("currentTime")  # 当前时间
-                                        duration = video.get_attribute("duration")  # 视频总时长
-                                        time.sleep(5)  # 每隔五秒检查一次视频看没看完
-                                        if currentTime == duration:
-                                            logging.info(f"{lessonName} | 已完成")
-                                            driver.close()
-                                            switchNew()
-                                            break
+                                    ac.click(lesson[0])
+                                    ac.perform()
+                                    time.sleep(3)  # 这里必须要等，不等无法切换到新页面
+                                    switchNew()
+                                    if (("xinli.ewt360.com" in driver.current_url) or
+                                            ("web.ewt360.com/spiritual-growth" in driver.current_url)):
+                                        time.sleep(5)
+                                        logging.info(f"{lessonName} | 已完成")
+                                        driver.close()
+                                        switchNew()
+                                    else:
+                                        time.sleep(3)
+                                        # 现在会自动播放，不需要手动点击播放按钮
+                                        # playBtn = driver.find_element(By.CLASS_NAME, "vjs-big-play-button")
+                                        # playBtn.click()  # 点击播放按钮
+                                        driver.execute_script('document.querySelector("video").muted = true')
+                                        driver.execute_script('document.querySelector("video").playbackRate = 2')
+                                        video = driver.find_element(By.TAG_NAME, "video")
+                                        while True:
+                                            # stupidList = driver.find_elements(By.CLASS_NAME, "earnest_check_mask_box")
+                                            stupid = driver.find_elements(By.XPATH, "//*[contains(text(),'点击通过检查')]")
+                                            stupid2 = driver.find_elements(By.CLASS_NAME, "action-skip")
+                                            if stupid:
+                                                ac.click(stupid[0])
+                                                ac.perform()
+                                                logging.info("EWT挂机检测")
+                                            if stupid2:
+                                                ac.click(stupid2[0])
+                                                ac.perform()
+                                                logging.info("EWT问题检测")
+                                            currentTime = video.get_attribute("currentTime")  # 当前时间
+                                            duration = video.get_attribute("duration")  # 视频总时长
+                                            time.sleep(5)  # 每隔五秒检查一次视频看没看完
+                                            if currentTime == duration:
+                                                logging.info(f"{lessonName} | 已完成")
+                                                driver.close()
+                                                switchNew()
+                                                break
                     else:
                         if len(datas[i + 1].text) == 0:
                             logging.info("右滑")
